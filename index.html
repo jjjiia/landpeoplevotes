@@ -162,7 +162,7 @@
             return "If each vote in "+d.state +" is drawn as 1 pixel"
           }else{
            
-            return "each vote in "+d.state+" is "+ Math.round(d.areaPerVote/combined[0].areaPerVote)+" pixels"
+            return "each vote in "+d.state+" would be "+ Math.round(d.areaPerVote/combined[0].areaPerVote)+" pixels"
           }
         })
         .attr('x',function(d,i){
