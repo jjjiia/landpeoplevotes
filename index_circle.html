@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>votes etc</title>
+		<title>D3: Loading multiple datasets from separate files</title>
         <script type="text/javascript" src="d3.js"></script>
         <script type="text/javascript" src="state_names.js"></script>
 	<style>
@@ -38,6 +38,7 @@
     In the District of Columbia, each of 344,356 votes represent 4949 square feet
     <br><br>In Alaska, each of 359,530 votes represent 44,277,376 square feet.
     </div>
+    
      <br> <br> <br> <br><br>*just division, no projection used yet
     
     </div>
@@ -66,7 +67,7 @@
         
         var smallest = combined[0]
         var largest = combined[combined.length-1]
-        var noAlaska = combined//.slice(0,combined.length-1)
+        var noAlaska = combined.slice(0,combined.length-1)
         
         drawCircles(noAlaska,largest)
         
@@ -77,12 +78,11 @@
         var columns = 5
         var h = 800
         var w = 1200
-        var max = 538
-        var stepTime = 500
-       // var rScale = d3.scaleLinear().domain([12,max]).range([1,h/2])
-       // var rScaleInverse = d3.scaleLinear().domain([1,h/2]).range([12,max])
+        var max = 1764
+        var stepTime = 700
+        var rScale = d3.scaleLinear().domain([40,max]).range([1/Math.PI,h/2])
         
-        //var aScale = d3.scaleLinear().domain([12,max*max]).range([1,h/2*h/2])
+        var aScale = d3.scaleLinear().domain([40,max*max*Math.PI]).range([1,h/2*h/2*Math.PI])
         
         var svg = d3.select("#chart").append("svg").attr('width',w).attr("height",h+100)
         svg.selectAll('circle')
@@ -108,9 +108,9 @@
         .attr("opacity",0)
         .attr("r",function(d,i){
           if(i==0){
-            return d.radius/combined[0].radius
+            return 1
           }
-          return d.radius/combined[0].radius
+          return rScale(Math.round(d.radius))
         })
         .transition()
         .delay(function(d,i){
@@ -158,11 +158,9 @@
         .attr("id",function(d){return d.state})
         .text(function(d,i){
           if(i==0){
-           
             return "If each vote in "+d.state +" is drawn as 1 pixel"
           }else{
-           
-            return "each vote in "+d.state+" is "+ Math.round(d.areaPerVote/combined[0].areaPerVote)+" pixels"
+            return "each vote in "+d.state+" is "+ Math.round(aScale(d.radius*d.radius*Math.PI))+" pixels"
           }
         })
         .attr('x',function(d,i){
@@ -172,7 +170,7 @@
           if(i==0){
             return h/2
           }
-          return h/2+d.radius/combined[0].radius+15
+          return h/2+rScale(Math.round(d.radius))+15
         })
         .attr("opacity",0)
         .transition()
@@ -205,11 +203,10 @@
       function combineAndSort(areaDict,votesDict){
         var combined = []
         for(var i in areaDict){
-          var area = areaDict[i]//feetToMeter
+          var area = areaDict[i]/feetToMeter
           var votes = votesDict[i]
           var areaPerVote = area/votes
           var radius = calculateRadius(areaPerVote)
-          
           if(votes!=undefined){
             combined.push({state:i,votes:votes,area:area,areaPerVote:areaPerVote,radius:radius})
             
